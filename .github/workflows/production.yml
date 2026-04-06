@@ -7,8 +7,12 @@ on:
     types: [published]
 
 jobs:
-  ota-update:
-    name: Publicar OTA Update
+  # ----------------------------------------------------------
+  # Push na main: notifica que o código chegou
+  # O build real acontece via tag de versão (abaixo)
+  # ----------------------------------------------------------
+  notify:
+    name: Codigo chegou na main
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
 
@@ -16,29 +20,19 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
 
-      - name: Configurar Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
+      - name: Confirmar deploy pendente
+        run: |
+          echo "✅ Código mergeado na main com sucesso"
+          echo "📦 Commit: ${{ github.event.head_commit.message }}"
+          echo "👤 Por: ${{ github.event.head_commit.author.name }}"
+          echo ""
+          echo "Para publicar nas lojas, crie uma tag de versão:"
+          echo "  git tag v1.x.x"
+          echo "  git push origin v1.x.x"
 
-      - name: Instalar dependências
-        run: npm ci
-
-      - name: Configurar EAS CLI
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          expo-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
-
-      - name: Publicar OTA Update
-        # Mensagem fixa evita que o texto do commit quebre o comando
-        run: eas update --branch production --message "Deploy automatico" --non-interactive
-        env:
-          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
-          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
-
+  # ----------------------------------------------------------
+  # Tag de versão (ex: v1.0.0): gera build para as lojas
+  # ----------------------------------------------------------
   store-build:
     name: Build para as lojas
     runs-on: ubuntu-latest
@@ -64,13 +58,13 @@ jobs:
           expo-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Build Android
+      - name: Build Android (.aab para Play Store)
         run: eas build --platform android --profile production --non-interactive
         env:
           EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
           EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
 
-      - name: Build iOS
+      - name: Build iOS (.ipa para App Store)
         run: eas build --platform ios --profile production --non-interactive
         env:
           EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
@@ -79,5 +73,5 @@ jobs:
       - name: Submeter para Play Store
         run: eas submit --platform android --profile production --non-interactive
 
-      - name: Submeter para App Store
+      - name: Submeter para App Store Connect
         run: eas submit --platform ios --profile production --non-interactive
