@@ -25,6 +25,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a215be23-8838-44c1-aa22-3d2ebfe628ec"
+      }
+    },
+    "owner": "andrewblackx"
   }
 }
