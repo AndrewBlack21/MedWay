@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    name: Checar tipos e dependências
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Checar TypeScript
+        run: npx tsc --noEmit
+
+      - name: Verificar se .env não foi commitado
+        run: |
+          if [ -f .env ]; then
+            echo "ERRO: arquivo .env encontrado no repositório!"
+            exit 1
+          fi
+          echo "OK: .env não está no repositório"
