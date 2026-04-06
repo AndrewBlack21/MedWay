@@ -1,5 +1,8 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+# Native
+.env
+
 # dependencies
 node_modules/
 
@@ -39,3 +42,4 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
