@@ -1,5 +1,5 @@
 import { supabase } from "../lib/supabase";
-import { Doctor, DoctorFormData } from "./types";
+import { Doctor, DoctorFormData } from "../types";
 import { geocodeAddress } from "./geocoding";
 
 export async function getDoctors(): Promise<Doctor[]> {

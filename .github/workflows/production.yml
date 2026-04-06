@@ -29,6 +29,7 @@ jobs:
         uses: expo/expo-github-action@v8
         with:
           eas-version: latest
+          expo-version: latest # adicionado — era isso que faltava
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Publicar OTA Update
@@ -63,6 +64,7 @@ jobs:
         uses: expo/expo-github-action@v8
         with:
           eas-version: latest
+          expo-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Build Android

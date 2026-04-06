@@ -155,10 +155,8 @@ export default function RouteScreen() {
   function extractPolyline(): { latitude: number; longitude: number }[] {
     if (!result?.geojson) return [];
     try {
-      const coords = result.geojson.features[0]?.geometry?.coordinates as [
-        number,
-        number,
-      ][];
+      const coords = (result.geojson.features[0]?.geometry as any)
+        ?.coordinates as [number, number][];
       return coords.map(([lng, lat]) => ({ latitude: lat, longitude: lng }));
     } catch {
       return [];

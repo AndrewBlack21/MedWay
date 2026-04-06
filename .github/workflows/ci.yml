@@ -38,4 +38,3 @@ jobs:
             exit 1
           fi
           echo "OK: .env não está no repositório"
-EOF
