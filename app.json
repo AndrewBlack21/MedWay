@@ -1,37 +1,41 @@
 {
   "expo": {
-    "name": "pharma-route",
+    "name": "PharmaRoute",
     "slug": "pharma-route",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#1D9E75"
     },
     "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.andrewblackx.pharmaroute"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "a215be23-8838-44c1-aa22-3d2ebfe628ec"
+      "supportsTablet": false,
+      "bundleIdentifier": "com.pharmaroute.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Usamos sua localização para exibir sua posição no mapa e calcular rotas.",
+        "NSLocationAlwaysUsageDescription": "Usamos sua localização para rastreamento de visitas em campo."
       }
     },
-    "owner": "andrewblackx"
+    "android": {
+      "package": "com.pharmaroute.app",
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
+      "config": {
+        "googleMaps": {
+          "apiKey": "SUA_GOOGLE_MAPS_KEY_ANDROID"
+        }
+      }
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Precisamos da sua localização para mostrar sua posição no mapa.",
+          "locationWhenInUsePermission": "Precisamos da sua localização para mostrar sua posição no mapa."
+        }
+      ]
+    ]
   }
 }
