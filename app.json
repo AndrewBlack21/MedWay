@@ -2,7 +2,10 @@
   "expo": {
     "name": "PharmaRoute",
     "slug": "pharma-route",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -23,6 +26,10 @@
     "android": {
       "package": "com.pharmaroute.app",
       "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_COARSE_LOCATION",
@@ -48,6 +55,12 @@
         "projectId": "a215be23-8838-44c1-aa22-3d2ebfe628ec"
       }
     },
-    "owner": "andrewblackx"
+    "owner": "andrewblackx",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/a215be23-8838-44c1-aa22-3d2ebfe628ec"
+    }
   }
 }

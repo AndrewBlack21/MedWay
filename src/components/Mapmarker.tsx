@@ -19,7 +19,7 @@ export default function MapMarker({ doctor, order, onPress }: Props) {
       onPress={() => onPress?.(doctor)}
       // tracksViewChanges=false melhora performance quando há muitos pins
       // o pin não precisa re-renderizar após o mount
-      tracksViewChanges={false}
+      tracksViewChanges={true}
     >
       <View style={[styles.pin, hasOrder && styles.pinOrdered]}>
         <Text style={styles.pinText}>{hasOrder ? order : "+"}</Text>

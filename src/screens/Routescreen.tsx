@@ -167,7 +167,12 @@ export default function RouteScreen() {
 
   return (
     <View style={styles.container}>
-      <MapView ref={mapRef} style={styles.map} showsUserLocation={!usingGPS}>
+      <MapView
+        ref={mapRef}
+        style={styles.map}
+        showsUserLocation={!usingGPS}
+        key={result ? "with-route" : "no-route"}
+      >
         {/* Pin do ponto de partida */}
         {startCoords && (
           <Marker
