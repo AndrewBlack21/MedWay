@@ -114,6 +114,12 @@ export default function MapScreen() {
           {doctors.length} médico{doctors.length !== 1 ? "s" : ""}
         </Text>
       </View>
+
+      {/* Card de info — aparece sobre o mapa ao clicar no pin */}
+      <DoctorInfoCard
+        doctor={selectedDoctor}
+        onClose={() => setSelectedDoctor(null)}
+      />
     </View>
   );
 }
