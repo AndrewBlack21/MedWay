@@ -33,9 +33,21 @@ export default function CheckInModal({
   if (!doctor) return null;
 
   async function handleSave() {
+    if (!doctor) return;
+
+    // Garante data válida mesmo se a prop chegar undefined
+    const safeDate = (() => {
+      if (date && date.trim().length === 10) return date;
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    })();
+
     setLoading(true);
     try {
-      await upsertLog(doctor!.id, date, status, comment.trim() || undefined);
+      await upsertLog(doctor.id, safeDate, status, comment.trim() || undefined);
       onSaved();
       onClose();
     } catch (e: any) {

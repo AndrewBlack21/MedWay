@@ -14,6 +14,7 @@ import styles from "./Mapstyle";
 import { Doctor } from "../types";
 import { getDoctors } from "../services/doctors";
 import MapMarker from "../components/Mapmarker";
+import DoctorInfoCard from "../components/DoctorInfoCard";
 
 export default function MapScreen() {
   const mapRef = useRef<MapView>(null);
@@ -23,7 +24,7 @@ export default function MapScreen() {
     latitude: number;
     longitude: number;
   } | null>(null);
-
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   useEffect(() => {
     loadData();
   }, []);

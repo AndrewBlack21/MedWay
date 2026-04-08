@@ -37,6 +37,15 @@ export async function upsertLog(
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) throw new Error("Não autenticado.");
 
+  if (!doctorId) throw new Error("ID do médico inválido.");
+  if (!date || date.trim() === "") {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    date = `${year}-${month}-${day}`;
+  }
+
   const { data, error } = await supabase
     .from("visit_logs")
     .upsert(
@@ -51,6 +60,7 @@ export async function upsertLog(
     )
     .select()
     .single();
+
   if (error) throw new Error(error.message);
   return data;
 }

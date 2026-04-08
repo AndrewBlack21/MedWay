@@ -32,6 +32,9 @@ type DistanceInfo = {
   distances: Record<string, number>;
 };
 
+const d = new Date();
+const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
 export default function RouteScreen() {
   const mapRef = useRef<MapView>(null);
   const [result, setResult] = useState<RouteResult | null>(null);
@@ -48,7 +51,6 @@ export default function RouteScreen() {
   const [distanceInfo, setDistanceInfo] = useState<DistanceInfo | null>(null);
 
   // Calendario e Check-in
-  const today = new Date().toISOString().split("T")[0];
   const [excludedIds, setExcludedIds] = useState<Set<string>>(new Set());
   const [filterSpecialty, setFilterSpecialty] = useState<string>("Todas");
   const [specialties, setSpecialties] = useState<string[]>([]);
@@ -256,7 +258,7 @@ export default function RouteScreen() {
 
       {/* Painel inferior */}
       <View style={styles.panel}>
-        {/* Filtro */}
+        {/* Filtros — fora do scroll, fixo no topo */}
         <View style={styles.filterBar}>
           <TouchableOpacity
             style={styles.filterToggleBtn}
@@ -268,256 +270,269 @@ export default function RouteScreen() {
           </TouchableOpacity>
           {excludedIds.size > 0 && (
             <Text style={styles.filterBadge}>
-              {excludedIds.size} excluidos(s)
+              {excludedIds.size} excluído(s)
             </Text>
           )}
         </View>
-        {/* Filtro */}
-        <View style={styles.filterSection}>
-          <Text style={styles.filterLabel}>Especialidade</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {specialties.map((s) => (
-              <TouchableOpacity
-                key={s}
-                style={[
-                  styles.chip,
-                  filterSpecialty === s && styles.chipActive,
-                ]}
-                onPress={() => {
-                  setFilterSpecialty(s);
-                  setResult(null);
-                }}
-              >
-                <Text
-                  style={[
-                    styles.chipText,
-                    filterSpecialty === s && styles.chipTextActive,
-                  ]}
-                >
-                  {s}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
 
-          <Text style={styles.filterLabel}>Excluir do roteiro</Text>
-          <ScrollView
-            style={{ maxHeight: 180 }}
-            showsVerticalScrollIndicator={false}
-          >
-            {allDoctors.map((d) => {
-              const excluded = excludedIds.has(d.id);
-              return (
-                <TouchableOpacity
-                  key={d.id}
-                  style={[
-                    styles.excludeItem,
-                    excluded && styles.excludeItemActive,
-                  ]}
-                  onPress={() => {
-                    toggleExclude(d.id);
-                    setResult(null);
-                  }}
-                >
-                  <View style={{ flex: 1 }}>
+        {/* Todo o restante do painel tem scroll */}
+        <ScrollView
+          style={styles.panelScroll}
+          contentContainerStyle={styles.panelScrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Seção de filtros expansível */}
+          {showFilters && (
+            <View style={styles.filterSection}>
+              <Text style={styles.filterLabel}>Especialidade</Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{ marginBottom: 10 }}
+              >
+                {specialties.map((s) => (
+                  <TouchableOpacity
+                    key={s}
+                    style={[
+                      styles.chip,
+                      filterSpecialty === s && styles.chipActive,
+                    ]}
+                    onPress={() => {
+                      setFilterSpecialty(s);
+                      setResult(null);
+                    }}
+                  >
                     <Text
                       style={[
-                        styles.excludeName,
-                        excluded && styles.excludeNameActive,
+                        styles.chipText,
+                        filterSpecialty === s && styles.chipTextActive,
                       ]}
                     >
-                      {d.name}
+                      {s}
                     </Text>
-                    <Text style={styles.excludeSpec}>{d.specialty}</Text>
-                  </View>
-                  <Text
-                    style={[
-                      styles.excludeIcon,
-                      excluded && styles.excludeIconActive,
-                    ]}
-                  >
-                    {excluded ? "✕" : "−"}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-        </View>
-        {/* Seção ponto de partida */}
-        <View style={styles.startSection}>
-          <Text style={styles.sectionLabel}>Ponto de partida</Text>
-          <View style={styles.startRow}>
-            <TextInput
-              style={styles.startInput}
-              placeholder="Endereço ou use o GPS"
-              placeholderTextColor="#aaa"
-              value={startAddress}
-              onChangeText={(v) => {
-                setStartAddress(v);
-                setStartCoords(null);
-                setDistanceInfo(null);
-              }}
-              onSubmitEditing={geocodeStart}
-              returnKeyType="search"
-            />
-            <TouchableOpacity
-              style={styles.gpsBtn}
-              onPress={useCurrentLocation}
-              disabled={usingGPS}
-            >
-              {usingGPS ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Text style={styles.gpsBtnText}>GPS</Text>
-              )}
-            </TouchableOpacity>
-            {startAddress.trim() && !startCoords && (
-              <TouchableOpacity
-                style={styles.searchBtn}
-                onPress={geocodeStart}
-                disabled={geocodingStart}
-              >
-                {geocodingStart ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Text style={styles.searchBtnText}>OK</Text>
-                )}
-              </TouchableOpacity>
-            )}
-          </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
 
-          {/* Destaques de distância */}
-          {distanceInfo && startCoords && (
-            <View style={styles.distanceCards}>
-              <View style={[styles.distCard, styles.distCardNearest]}>
-                <Text style={styles.distCardLabel}>Mais próximo</Text>
-                <Text style={styles.distCardName} numberOfLines={1}>
-                  {distanceInfo.nearest.name}
-                </Text>
-                <Text style={styles.distCardKm}>
-                  {distanceInfo.distances[distanceInfo.nearest.id]} km
-                </Text>
-              </View>
-              <View style={[styles.distCard, styles.distCardFarthest]}>
-                <Text style={styles.distCardLabel}>Mais distante</Text>
-                <Text style={styles.distCardName} numberOfLines={1}>
-                  {distanceInfo.farthest.name}
-                </Text>
-                <Text style={styles.distCardKm}>
-                  {distanceInfo.distances[distanceInfo.farthest.id]} km
-                </Text>
-              </View>
-            </View>
-          )}
-        </View>
-
-        {/* Botão gerar roteiro */}
-        {!result && (
-          <TouchableOpacity
-            style={styles.generateBtn}
-            onPress={handleGenerateRoute}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.generateBtnText}>
-                {startCoords ? "Gerar roteiro a partir daqui" : "Gerar roteiro"}
-              </Text>
-            )}
-          </TouchableOpacity>
-        )}
-
-        {/* Lista de paradas */}
-        {result && (
-          <>
-            <View style={styles.panelHeader}>
-              <View>
-                <Text style={styles.panelTitle}>Roteiro do dia</Text>
-                <Text style={styles.panelSub}>
-                  {result.stops.length} visitas · ~{result.total_distance_km} km
-                  {startCoords ? " (incl. saída)" : ""}
-                </Text>
-              </View>
-              <TouchableOpacity
-                style={styles.regenBtn}
-                onPress={() => {
-                  setResult(null);
-                }}
-              >
-                <Text style={styles.regenText}>Refazer</Text>
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView
-              style={styles.stopsList}
-              showsVerticalScrollIndicator={false}
-            >
-              {result.stops.map((stop) => {
-                const log = getLogForDoctor(stop.doctor.id);
+              <Text style={styles.filterLabel}>Excluir do roteiro</Text>
+              {allDoctors.map((d) => {
+                const excluded = excludedIds.has(d.id);
                 return (
                   <TouchableOpacity
-                    key={stop.doctor.id}
-                    style={styles.stopItem}
-                    onPress={() => openInMaps(stop.doctor)}
-                    activeOpacity={0.7}
+                    key={d.id}
+                    style={[
+                      styles.excludeItem,
+                      excluded && styles.excludeItemActive,
+                    ]}
+                    onPress={() => {
+                      toggleExclude(d.id);
+                      setResult(null);
+                    }}
                   >
-                    <View
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={[
+                          styles.excludeName,
+                          excluded && styles.excludeNameActive,
+                        ]}
+                      >
+                        {d.name}
+                      </Text>
+                      <Text style={styles.excludeSpec}>{d.specialty}</Text>
+                    </View>
+                    <Text
                       style={[
-                        styles.stopNumber,
-                        stop.doctor.id === distanceInfo?.nearest.id &&
-                          styles.stopNearest,
-                        stop.doctor.id === distanceInfo?.farthest.id &&
-                          styles.stopFarthest,
+                        styles.excludeIcon,
+                        excluded && styles.excludeIconActive,
                       ]}
                     >
-                      <Text style={styles.stopNumberText}>{stop.order}</Text>
-                    </View>
-                    <View style={styles.stopInfo}>
-                      <Text style={styles.stopName}>{stop.doctor.name}</Text>
-                      <Text style={styles.stopSpecialty}>
-                        {stop.doctor.specialty}
-                      </Text>
-                      {stop.distance_from_prev_km !== undefined &&
-                        stop.distance_from_prev_km > 0 && (
-                          <Text style={styles.stopDist}>
-                            +{stop.distance_from_prev_km} km
-                          </Text>
-                        )}
-                      {log?.comment ? (
-                        <Text style={styles.stopComment}>"{log.comment}"</Text>
-                      ) : null}
-                    </View>
-                    <TouchableOpacity
-                      style={[
-                        styles.checkInBtn,
-                        log?.status === "visited" && styles.checkInVisited,
-                        log?.status === "not_visited" &&
-                          styles.checkInNotVisited,
-                      ]}
-                      onPress={() => setCheckInDoctor(stop.doctor)}
-                    >
-                      <Text style={styles.checkInBtnText}>
-                        {log?.status === "visited"
-                          ? "✓"
-                          : log?.status === "not_visited"
-                            ? "✗"
-                            : "•••"}
-                      </Text>
-                    </TouchableOpacity>
+                      {excluded ? "✕" : "−"}
+                    </Text>
                   </TouchableOpacity>
                 );
               })}
-            </ScrollView>
-          </>
-        )}
+            </View>
+          )}
+
+          {/* Ponto de partida */}
+          <View style={styles.startSection}>
+            <Text style={styles.sectionLabel}>Ponto de partida</Text>
+            <View style={styles.startRow}>
+              <TextInput
+                style={styles.startInput}
+                placeholder="Endereço ou use o GPS"
+                placeholderTextColor="#aaa"
+                value={startAddress}
+                onChangeText={(v) => {
+                  setStartAddress(v);
+                  setStartCoords(null);
+                  setDistanceInfo(null);
+                }}
+                onSubmitEditing={geocodeStart}
+                returnKeyType="search"
+              />
+              <TouchableOpacity
+                style={styles.gpsBtn}
+                onPress={useCurrentLocation}
+                disabled={usingGPS}
+              >
+                {usingGPS ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.gpsBtnText}>GPS</Text>
+                )}
+              </TouchableOpacity>
+              {startAddress.trim() && !startCoords && (
+                <TouchableOpacity
+                  style={styles.searchBtn}
+                  onPress={geocodeStart}
+                  disabled={geocodingStart}
+                >
+                  {geocodingStart ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <Text style={styles.searchBtnText}>OK</Text>
+                  )}
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {distanceInfo && startCoords && (
+              <View style={styles.distanceCards}>
+                <View style={[styles.distCard, styles.distCardNearest]}>
+                  <Text style={styles.distCardLabel}>Mais próximo</Text>
+                  <Text style={styles.distCardName} numberOfLines={1}>
+                    {distanceInfo.nearest.name}
+                  </Text>
+                  <Text style={styles.distCardKm}>
+                    {distanceInfo.distances[distanceInfo.nearest.id]} km
+                  </Text>
+                </View>
+                <View style={[styles.distCard, styles.distCardFarthest]}>
+                  <Text style={styles.distCardLabel}>Mais distante</Text>
+                  <Text style={styles.distCardName} numberOfLines={1}>
+                    {distanceInfo.farthest.name}
+                  </Text>
+                  <Text style={styles.distCardKm}>
+                    {distanceInfo.distances[distanceInfo.farthest.id]} km
+                  </Text>
+                </View>
+              </View>
+            )}
+          </View>
+
+          {/* Botão gerar roteiro */}
+          {!result && (
+            <TouchableOpacity
+              style={styles.generateBtn}
+              onPress={handleGenerateRoute}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.generateBtnText}>
+                  {startCoords
+                    ? "Gerar roteiro a partir daqui"
+                    : "Gerar roteiro"}
+                </Text>
+              )}
+            </TouchableOpacity>
+          )}
+
+          {/* Lista de paradas */}
+          {result && (
+            <View>
+              <View style={styles.panelHeader}>
+                <View>
+                  <Text style={styles.panelTitle}>Roteiro do dia</Text>
+                  <Text style={styles.panelSub}>
+                    {result.stops.length} visitas · ~{result.total_distance_km}{" "}
+                    km
+                    {startCoords ? " (incl. saída)" : ""}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.regenBtn}
+                  onPress={() => setResult(null)}
+                >
+                  <Text style={styles.regenText}>Refazer</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.stopsList}>
+                {result.stops.map((stop) => {
+                  const log = getLogForDoctor(stop.doctor.id);
+                  return (
+                    <TouchableOpacity
+                      key={stop.doctor.id}
+                      style={styles.stopItem}
+                      onPress={() => openInMaps(stop.doctor)}
+                      activeOpacity={0.7}
+                    >
+                      <View
+                        style={[
+                          styles.stopNumber,
+                          stop.doctor.id === distanceInfo?.nearest?.id &&
+                            styles.stopNearest,
+                          stop.doctor.id === distanceInfo?.farthest.id &&
+                            styles.stopFarthest,
+                        ]}
+                      >
+                        <Text style={styles.stopNumberText}>{stop.order}</Text>
+                      </View>
+                      <View style={styles.stopInfo}>
+                        <Text style={styles.stopName}>{stop.doctor.name}</Text>
+                        <Text style={styles.stopSpecialty}>
+                          {stop.doctor.specialty}
+                        </Text>
+                        {stop.distance_from_prev_km !== undefined &&
+                          stop.distance_from_prev_km > 0 && (
+                            <Text style={styles.stopDist}>
+                              +{stop.distance_from_prev_km} km
+                            </Text>
+                          )}
+                        {log?.comment ? (
+                          <Text style={styles.stopComment}>
+                            "{log.comment}"
+                          </Text>
+                        ) : null}
+                      </View>
+                      <TouchableOpacity
+                        style={[
+                          styles.checkInBtn,
+                          log?.status === "visited" && styles.checkInVisited,
+                          log?.status === "not_visited" &&
+                            styles.checkInNotVisited,
+                        ]}
+                        onPress={() => setCheckInDoctor(stop.doctor)}
+                      >
+                        <Text style={styles.checkInBtnText}>
+                          {log?.status === "visited"
+                            ? "✓"
+                            : log?.status === "not_visited"
+                              ? "✗"
+                              : "•••"}
+                        </Text>
+                      </TouchableOpacity>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+          )}
+        </ScrollView>
+      </View>
+      {/* O Modal deve ficar AQUI, dentro da View principal */}
+      {checkInDoctor && (
         <CheckInModal
           doctor={checkInDoctor}
-          date={today}
+          date={today} // <-- ADICIONE ESTA LINHA
           onClose={() => setCheckInDoctor(null)}
           onSaved={onCheckInSaved}
         />
-      </View>
+      )}
     </View>
   );
 }
