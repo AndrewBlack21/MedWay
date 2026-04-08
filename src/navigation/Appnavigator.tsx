@@ -13,6 +13,7 @@ import DoctorFormScreen from "../screens/Doctorformscreen";
 import MapScreen from "../screens/MapScreen";
 import RouteScreen from "../screens/Routescreen";
 import ImportScreen from "../screens/Importscreen";
+import CalendarScreen from "../screens/CalendarScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -68,6 +69,11 @@ export default function AppNavigator() {
               name="DoctorForm"
               component={DoctorFormScreen}
               options={{ title: "Cadastrar Médico" }}
+            />
+            <Stack.Screen
+              name="Calendar"
+              component={CalendarScreen}
+              options={{ title: "Historico de Visitas" }}
             />
             <Stack.Screen
               name="Map"

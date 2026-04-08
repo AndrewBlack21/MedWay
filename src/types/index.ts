@@ -19,6 +19,23 @@ export interface DoctorFormData {
   hours: string;
 }
 
+export type VisitStatus = "visited" | "not_visited" | "pending";
+
+export interface VisitLog {
+  id: string;
+  user_id: string;
+  doctorId: string;
+  visit_date: string;
+  status: VisitStatus;
+  comment: string | null;
+  created_at: string;
+}
+
+export interface Daylog {
+  date: string;
+  logs: VisitLog[];
+}
+
 export interface RouteStop {
   doctor: Doctor;
   order: number;
@@ -44,4 +61,5 @@ export type RootStackParamList = {
   Map: undefined;
   Route: undefined;
   Import: undefined; // nova rota de importação
+  Calendar: undefined;
 };

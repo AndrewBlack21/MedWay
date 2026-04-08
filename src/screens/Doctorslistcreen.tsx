@@ -153,6 +153,19 @@ export default function DoctorsListScreen() {
         >
           <Text style={styles.actionBtnText}>Ver Mapa</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.actionBtn,
+            { backgroundColor: "#EEF0FE", borderColor: "#AFA9EC" },
+          ]}
+          onPress={() => navigation.navigate("Calendar")}
+        >
+          <Text style={{ color: "#3C3489", fontWeight: "600", fontSize: 12 }}>
+            📅 Histórico
+          </Text>
+        </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.actionBtn}
           onPress={() => navigation.navigate("Route")}

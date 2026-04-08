@@ -21,6 +21,11 @@ import { generateRoute, calcDistancesFromStart } from "../services/routing";
 import { geocodeAddress } from "../services/geocoding";
 import MapMarker from "../components/Mapmarker";
 
+// Import Calender
+import CheckInModal from "../components/CheckInModal";
+import { VisitLog } from "../types";
+import { getLogsByDate, upsertLog } from "../services/visitsLogs";
+
 type DistanceInfo = {
   nearest: Doctor;
   farthest: Doctor;
@@ -42,6 +47,15 @@ export default function RouteScreen() {
   // Info de distâncias
   const [distanceInfo, setDistanceInfo] = useState<DistanceInfo | null>(null);
 
+  // Calendario e Check-in
+  const today = new Date().toISOString().split("T")[0];
+  const [excludedIds, setExcludedIds] = useState<Set<string>>(new Set());
+  const [filterSpecialty, setFilterSpecialty] = useState<string>("Todas");
+  const [specialties, setSpecialties] = useState<string[]>([]);
+  const [checkInDoctor, setCheckInDoctor] = useState<Doctor | null>(null);
+  const [todayLogs, setTodayLogs] = useState<VisitLog[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
+
   useEffect(() => {
     loadDoctors();
   }, []);
@@ -50,9 +64,42 @@ export default function RouteScreen() {
     try {
       const doctors = await getDoctors();
       setAllDoctors(doctors);
+      const specs = [
+        "Todas",
+        ...Array.from(new Set(doctors.map((d) => d.specialty))),
+      ];
+      setSpecialties(specs);
+      const logs = await getLogsByDate(today);
+      setTodayLogs(logs);
     } catch (e: any) {
       Alert.alert("Erro", e.message);
     }
+  }
+
+  const filteredDoctors = allDoctors.filter((d) => {
+    if (excludedIds.has(d.id)) return false;
+    if (filterSpecialty !== "Todas" && d.specialty !== filterSpecialty)
+      return false;
+    return true;
+  });
+
+  function toggleExclude(id: string) {
+    setExcludedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function getLogForDoctor(doctorId: string): VisitLog | undefined {
+    return todayLogs.find((l) => l.doctor_id === doctorId);
+  }
+
+  function onCheckInSaved() {
+    getLogsByDate(today)
+      .then(setTodayLogs)
+      .catch(() => {});
   }
 
   async function useCurrentLocation() {
@@ -109,14 +156,14 @@ export default function RouteScreen() {
   }
 
   async function handleGenerateRoute() {
-    if (allDoctors.length === 0) {
-      Alert.alert("Atenção", "Cadastre médicos primeiro.");
+    if (filteredDoctors.length === 0) {
+      Alert.alert("Atenção", "Nenhum médico disponível com os filtros atuais.");
       return;
     }
     setLoading(true);
     try {
       const routeResult = await generateRoute(
-        allDoctors,
+        filteredDoctors, // <-- era allDoctors
         startCoords?.lat,
         startCoords?.lng,
       );
@@ -209,6 +256,93 @@ export default function RouteScreen() {
 
       {/* Painel inferior */}
       <View style={styles.panel}>
+        {/* Filtro */}
+        <View style={styles.filterBar}>
+          <TouchableOpacity
+            style={styles.filterToggleBtn}
+            onPress={() => setShowFilters((v) => !v)}
+          >
+            <Text style={styles.filterToggleText}>
+              {showFilters ? "▲ Filtros" : "▼ Filtros"}
+            </Text>
+          </TouchableOpacity>
+          {excludedIds.size > 0 && (
+            <Text style={styles.filterBadge}>
+              {excludedIds.size} excluidos(s)
+            </Text>
+          )}
+        </View>
+        {/* Filtro */}
+        <View style={styles.filterSection}>
+          <Text style={styles.filterLabel}>Especialidade</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {specialties.map((s) => (
+              <TouchableOpacity
+                key={s}
+                style={[
+                  styles.chip,
+                  filterSpecialty === s && styles.chipActive,
+                ]}
+                onPress={() => {
+                  setFilterSpecialty(s);
+                  setResult(null);
+                }}
+              >
+                <Text
+                  style={[
+                    styles.chipText,
+                    filterSpecialty === s && styles.chipTextActive,
+                  ]}
+                >
+                  {s}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          <Text style={styles.filterLabel}>Excluir do roteiro</Text>
+          <ScrollView
+            style={{ maxHeight: 180 }}
+            showsVerticalScrollIndicator={false}
+          >
+            {allDoctors.map((d) => {
+              const excluded = excludedIds.has(d.id);
+              return (
+                <TouchableOpacity
+                  key={d.id}
+                  style={[
+                    styles.excludeItem,
+                    excluded && styles.excludeItemActive,
+                  ]}
+                  onPress={() => {
+                    toggleExclude(d.id);
+                    setResult(null);
+                  }}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={[
+                        styles.excludeName,
+                        excluded && styles.excludeNameActive,
+                      ]}
+                    >
+                      {d.name}
+                    </Text>
+                    <Text style={styles.excludeSpec}>{d.specialty}</Text>
+                  </View>
+                  <Text
+                    style={[
+                      styles.excludeIcon,
+                      excluded && styles.excludeIconActive,
+                    ]}
+                  >
+                    {excluded ? "✕" : "−"}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
         {/* Seção ponto de partida */}
         <View style={styles.startSection}>
           <Text style={styles.sectionLabel}>Ponto de partida</Text>
@@ -319,42 +453,70 @@ export default function RouteScreen() {
               style={styles.stopsList}
               showsVerticalScrollIndicator={false}
             >
-              {result.stops.map((stop) => (
-                <TouchableOpacity
-                  key={stop.doctor.id}
-                  style={styles.stopItem}
-                  onPress={() => openInMaps(stop.doctor)}
-                  activeOpacity={0.7}
-                >
-                  <View
-                    style={[
-                      styles.stopNumber,
-                      stop.doctor.id === distanceInfo?.nearest.id &&
-                        styles.stopNearest,
-                      stop.doctor.id === distanceInfo?.farthest.id &&
-                        styles.stopFarthest,
-                    ]}
+              {result.stops.map((stop) => {
+                const log = getLogForDoctor(stop.doctor.id);
+                return (
+                  <TouchableOpacity
+                    key={stop.doctor.id}
+                    style={styles.stopItem}
+                    onPress={() => openInMaps(stop.doctor)}
+                    activeOpacity={0.7}
                   >
-                    <Text style={styles.stopNumberText}>{stop.order}</Text>
-                  </View>
-                  <View style={styles.stopInfo}>
-                    <Text style={styles.stopName}>{stop.doctor.name}</Text>
-                    <Text style={styles.stopSpecialty}>
-                      {stop.doctor.specialty}
-                    </Text>
-                    {stop.distance_from_prev_km !== undefined &&
-                      stop.distance_from_prev_km > 0 && (
-                        <Text style={styles.stopDist}>
-                          +{stop.distance_from_prev_km} km da parada anterior
-                        </Text>
-                      )}
-                  </View>
-                  <Text style={styles.navIcon}>→</Text>
-                </TouchableOpacity>
-              ))}
+                    <View
+                      style={[
+                        styles.stopNumber,
+                        stop.doctor.id === distanceInfo?.nearest.id &&
+                          styles.stopNearest,
+                        stop.doctor.id === distanceInfo?.farthest.id &&
+                          styles.stopFarthest,
+                      ]}
+                    >
+                      <Text style={styles.stopNumberText}>{stop.order}</Text>
+                    </View>
+                    <View style={styles.stopInfo}>
+                      <Text style={styles.stopName}>{stop.doctor.name}</Text>
+                      <Text style={styles.stopSpecialty}>
+                        {stop.doctor.specialty}
+                      </Text>
+                      {stop.distance_from_prev_km !== undefined &&
+                        stop.distance_from_prev_km > 0 && (
+                          <Text style={styles.stopDist}>
+                            +{stop.distance_from_prev_km} km
+                          </Text>
+                        )}
+                      {log?.comment ? (
+                        <Text style={styles.stopComment}>"{log.comment}"</Text>
+                      ) : null}
+                    </View>
+                    <TouchableOpacity
+                      style={[
+                        styles.checkInBtn,
+                        log?.status === "visited" && styles.checkInVisited,
+                        log?.status === "not_visited" &&
+                          styles.checkInNotVisited,
+                      ]}
+                      onPress={() => setCheckInDoctor(stop.doctor)}
+                    >
+                      <Text style={styles.checkInBtnText}>
+                        {log?.status === "visited"
+                          ? "✓"
+                          : log?.status === "not_visited"
+                            ? "✗"
+                            : "•••"}
+                      </Text>
+                    </TouchableOpacity>
+                  </TouchableOpacity>
+                );
+              })}
             </ScrollView>
           </>
         )}
+        <CheckInModal
+          doctor={checkInDoctor}
+          date={today}
+          onClose={() => setCheckInDoctor(null)}
+          onSaved={onCheckInSaved}
+        />
       </View>
     </View>
   );

@@ -136,6 +136,130 @@ const styles = StyleSheet.create({
   stopSpecialty: { fontSize: 12, color: colors.text, marginTop: 1 },
   stopDist: { fontSize: 11, color: "#aaa", marginTop: 2 },
   navIcon: { fontSize: 18, color: "#ccc" },
+  filterBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 0.5,
+    borderBottomColor: "#eee",
+  },
+  filterToggleBtn: {
+    paddingVertical: 4,
+  },
+  filterToggleText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#1D9E75",
+  },
+  filterBadge: {
+    fontSize: 11,
+    color: "#E24B4A",
+    fontWeight: "600",
+  },
+  filterSection: {
+    paddingHorizontal: 14,
+    paddingTop: 10,
+    paddingBottom: 8,
+    borderBottomWidth: 0.5,
+    borderBottomColor: "#eee",
+  },
+  filterLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#aaa",
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+    marginBottom: 8,
+  },
+  chip: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    marginRight: 8,
+    backgroundColor: "#fff",
+  },
+  chipActive: {
+    backgroundColor: "#1D9E75",
+    borderColor: "#1D9E75",
+  },
+  chipText: {
+    fontSize: 12,
+    color: "#555",
+    fontWeight: "500",
+  },
+  chipTextActive: {
+    color: "#fff",
+    fontWeight: "700",
+  },
+  excludeItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 9,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#eee",
+    marginBottom: 6,
+    backgroundColor: "#fff",
+  },
+  excludeItemActive: {
+    borderColor: "#E24B4A",
+    backgroundColor: "#FCEBEB",
+  },
+  excludeName: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#1a1a1a",
+  },
+  excludeNameActive: {
+    color: "#A32D2D",
+    textDecorationLine: "line-through",
+  },
+  excludeSpec: {
+    fontSize: 11,
+    color: "#888",
+  },
+  excludeIcon: {
+    fontSize: 18,
+    color: "#ccc",
+    fontWeight: "700",
+  },
+  excludeIconActive: {
+    color: "#E24B4A",
+  },
+  checkInBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: "#ddd",
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 8,
+  },
+  checkInVisited: {
+    backgroundColor: "#E1F5EE",
+    borderColor: "#1D9E75",
+  },
+  checkInNotVisited: {
+    backgroundColor: "#FCEBEB",
+    borderColor: "#E24B4A",
+  },
+  checkInBtnText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#888",
+  },
+  stopComment: {
+    fontSize: 11,
+    color: "#aaa",
+    fontStyle: "italic",
+    marginTop: 2,
+  },
 });
 
 export default styles;
