@@ -20,6 +20,7 @@ import { getDoctors } from "../services/doctors";
 import { generateRoute, calcDistancesFromStart } from "../services/routing";
 import { geocodeAddress } from "../services/geocoding";
 import MapMarker from "../components/Mapmarker";
+import DoctorInfoCard from "../components/DoctorInfoCard";
 
 // Import Calender
 import CheckInModal from "../components/CheckInModal";
@@ -56,6 +57,9 @@ export default function RouteScreen() {
 
   // Info de distâncias
   const [distanceInfo, setDistanceInfo] = useState<DistanceInfo | null>(null);
+
+  // Mapa Pin
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
 
   // Calendario e Check-in
   const [excludedIds, setExcludedIds] = useState<Set<string>>(new Set());
@@ -289,12 +293,19 @@ export default function RouteScreen() {
             key={stop.doctor.id}
             doctor={stop.doctor}
             order={stop.order}
+            onPress={(d) => setSelectedDoctor(d)}
           />
         ))}
 
         {/* Médicos antes de gerar — sem número */}
         {!result &&
-          allDoctors.map((doc) => <MapMarker key={doc.id} doctor={doc} />)}
+          allDoctors.map((doc) => (
+            <MapMarker
+              key={doc.id}
+              doctor={doc}
+              onPress={(d) => setSelectedDoctor(d)}
+            />
+          ))}
 
         {polyline.length > 1 && (
           <Polyline
@@ -631,6 +642,11 @@ export default function RouteScreen() {
           onSaved={onCheckInSaved}
         />
       )}
+
+      <DoctorInfoCard
+        doctor={selectedDoctor}
+        onClose={() => setSelectedDoctor(null)}
+      />
     </View>
   );
 }

@@ -100,9 +100,14 @@ export default function MapScreen() {
         showsUserLocation
         showsMyLocationButton={false}
         onMapReady={fitMapToDoctors}
+        onPress={() => setSelectedDoctor(null)}
       >
         {doctors.map((doc) => (
-          <MapMarker key={doc.id} doctor={doc} />
+          <MapMarker
+            key={doc.id}
+            doctor={doc}
+            onPress={(d) => setSelectedDoctor(d)}
+          />
         ))}
       </MapView>
 
