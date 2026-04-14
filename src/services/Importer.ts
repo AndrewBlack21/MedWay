@@ -1,25 +1,141 @@
-// SDK 54+: importa da versão legacy para manter compatibilidade
 import * as FileSystem from "expo-file-system/legacy";
-import { DoctorFormData } from "../types";
+import { DoctorFormData, WeekDay, VisitPeriod } from "../types";
 
-const COL_NAME = ["nome", "name", "medico", "doutor"];
-const COL_SPECIALTY = ["especialidade", "specialty", "esp", "especializacao"];
-const COL_ADDRESS = ["endereco", "address", "end", "logradouro"];
-const COL_HOURS = ["horario", "hours", "atendimento", "hora"];
+const COL_NAME = [
+  "nome",
+  "name",
+  "medico",
+  "doutor",
+  "dr",
+  "dra",
+  "nomecompleto",
+  "nomemedico",
+];
+const COL_SPECIALTY = [
+  "especialidade",
+  "specialty",
+  "esp",
+  "especializacao",
+  "area",
+];
+const COL_ADDRESS = [
+  "endereco",
+  "address",
+  "end",
+  "logradouro",
+  "local",
+  "localizacao",
+  "rua",
+];
+const COL_HOURS = [
+  "horario",
+  "hours",
+  "atendimento",
+  "hora",
+  "horariodeatendimento",
+  "horatendimento",
+];
+const COL_VISIT_DAYS = [
+  "dias",
+  "diasatendimento",
+  "diasemana",
+  "visitdays",
+  "days",
+  "diasdeatendimento",
+  "diaatendimento",
+];
+const COL_CYCLE = [
+  "ciclo",
+  "ciclos",
+  "visitasciclo",
+  "cycle",
+  "cycletarget",
+  "trimestre",
+  "visitastrimestre",
+  "frequencia",
+];
+const COL_PERIOD = [
+  "periodo",
+  "turno",
+  "period",
+  "visitperiod",
+  "periodododia",
+];
 
-function normalize(s: string): string {
+function normalizeStr(s: string): string {
+  if (!s) return "";
   return s
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/g, "")
     .trim();
 }
 
 function findCol(headers: string[], candidates: string[]): string | null {
   for (const h of headers) {
-    if (candidates.includes(normalize(h))) return h;
+    const n = normalizeStr(h);
+    if (!n) continue;
+    for (const c of candidates) {
+      if (n === c || n.includes(c) || c.includes(n)) {
+        return h;
+      }
+    }
   }
   return null;
+}
+
+function parseDays(raw: string): WeekDay[] {
+  if (!raw) return [];
+  const map: Record<string, WeekDay> = {
+    seg: "monday",
+    segunda: "monday",
+    segundafeira: "monday",
+    mon: "monday",
+    monday: "monday",
+    ter: "tuesday",
+    terca: "tuesday",
+    tercafeira: "tuesday",
+    tue: "tuesday",
+    tuesday: "tuesday",
+    qua: "wednesday",
+    quarta: "wednesday",
+    quartafeira: "wednesday",
+    wed: "wednesday",
+    wednesday: "wednesday",
+    qui: "thursday",
+    quinta: "thursday",
+    quintafeira: "thursday",
+    thu: "thursday",
+    thursday: "thursday",
+    sex: "friday",
+    sexta: "friday",
+    sextafeira: "friday",
+    fri: "friday",
+    friday: "friday",
+  };
+  return raw
+    .split(/[,;\/ ]+/)
+    .map((d) => map[normalizeStr(d)])
+    .filter((d): d is WeekDay => !!d);
+}
+
+function parsePeriod(raw: string): VisitPeriod {
+  if (!raw) return "both";
+  const n = normalizeStr(raw);
+  if (n.includes("manha") || n.includes("morning") || n === "m") {
+    return "morning";
+  }
+  if (n.includes("tarde") || n.includes("afternoon") || n === "t") {
+    return "afternoon";
+  }
+  return "both";
+}
+
+function parseCycle(raw: string): number {
+  if (!raw) return 1;
+  const n = parseInt(raw.replace(/[^0-9]/g, ""), 10);
+  return isNaN(n) || n < 1 ? 1 : n;
 }
 
 function parseCsv(text: string): string[][] {
@@ -80,6 +196,9 @@ export interface ImportRow {
   specialty: string;
   address: string;
   hours: string;
+  visit_days: WeekDay[];
+  visit_period: VisitPeriod;
+  cycle_target: number;
 }
 
 export interface ImportPreview {
@@ -106,7 +225,6 @@ export async function parseSpreadsheet(
     };
   }
 
-  // Copia para o cache do app — garante acesso de leitura
   let localUri = fileUri;
   try {
     const dest = `${FileSystem.cacheDirectory}import_${Date.now()}.csv`;
@@ -148,22 +266,26 @@ export async function parseSpreadsheet(
   }
 
   const headers = matrix[0];
+
   const colName = findCol(headers, COL_NAME);
   const colSpecialty = findCol(headers, COL_SPECIALTY);
   const colAddress = findCol(headers, COL_ADDRESS);
   const colHours = findCol(headers, COL_HOURS);
+  const colVisitDays = findCol(headers, COL_VISIT_DAYS);
+  const colCycle = findCol(headers, COL_CYCLE);
+  const colPeriod = findCol(headers, COL_PERIOD);
 
-  if (!colName) {
-    errors.push(
-      `Coluna "Nome" não encontrada. Detectadas: ${headers.join(", ")}`,
-    );
-  }
-  if (!colAddress) {
-    errors.push(
-      `Coluna "Endereço" não encontrada. Detectadas: ${headers.join(", ")}`,
-    );
-  }
   if (!colName || !colAddress) {
+    const detected = headers
+      .map((h) => `"${h}"(${normalizeStr(h)})`)
+      .join(", ");
+    if (!colName) {
+      errors.push(`Coluna "Nome" não encontrada.`);
+    }
+    if (!colAddress) {
+      errors.push(`Coluna "Endereço" não encontrada.`);
+    }
+    errors.push(`Cabeçalhos detectados: ${detected}`);
     return { rows: [], errors, total: matrix.length - 1 };
   }
 
@@ -171,6 +293,9 @@ export async function parseSpreadsheet(
   const idxSpecialty = colSpecialty ? headers.indexOf(colSpecialty) : -1;
   const idxAddress = headers.indexOf(colAddress);
   const idxHours = colHours ? headers.indexOf(colHours) : -1;
+  const idxVisitDays = colVisitDays ? headers.indexOf(colVisitDays) : -1;
+  const idxCycle = colCycle ? headers.indexOf(colCycle) : -1;
+  const idxPeriod = colPeriod ? headers.indexOf(colPeriod) : -1;
 
   const rows: ImportRow[] = [];
   const dataRows = matrix.slice(1);
@@ -196,6 +321,10 @@ export async function parseSpreadsheet(
           : "Não informada",
       address,
       hours: idxHours >= 0 ? (cols[idxHours] ?? "").trim() : "",
+      visit_days: idxVisitDays >= 0 ? parseDays(cols[idxVisitDays] ?? "") : [],
+      visit_period:
+        idxPeriod >= 0 ? parsePeriod(cols[idxPeriod] ?? "") : "both",
+      cycle_target: idxCycle >= 0 ? parseCycle(cols[idxCycle] ?? "") : 1,
     });
   });
 
@@ -208,5 +337,13 @@ export function rowToFormData(row: ImportRow): DoctorFormData {
     specialty: row.specialty || "Não informada",
     address: row.address,
     hours: row.hours,
+  };
+}
+
+export function rowToExtra(row: ImportRow) {
+  return {
+    visit_days: row.visit_days,
+    visit_period: row.visit_period,
+    cycle_target: row.cycle_target,
   };
 }

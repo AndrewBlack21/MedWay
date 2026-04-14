@@ -18,6 +18,10 @@ import { RootStackParamList, DoctorFormData } from "../types";
 import { createDoctor, updateDoctor } from "../services/doctors";
 import styles from "./Doctorformscreenstyle";
 
+import WeekDayPicker from "../components/WeekDayPicker";
+import PeriodPicker from "../components/PeriodPicker";
+import { WeekDay, VisitPeriod } from "../types";
+
 type Nav = NativeStackNavigationProp<RootStackParamList, "DoctorForm">;
 type Route = RouteProp<RootStackParamList, "DoctorForm">;
 
@@ -49,6 +53,18 @@ export default function DoctorFormScreen() {
     address: editingDoctor?.address ?? "",
     hours: editingDoctor?.hours ?? "",
   });
+
+  //Adicionando states novos
+  const [visitDays, setVisitDays] = useState<WeekDay[]>(
+    (editingDoctor?.visit_days as WeekDay[]) ?? [],
+  );
+  const [visitPeriod, setVisitPeriod] = useState<VisitPeriod>(
+    (editingDoctor?.visit_period as VisitPeriod) ?? "both",
+  );
+  const [cycleTarget, setCycleTarget] = useState<string>(
+    String(editingDoctor?.cycle_target ?? 1),
+  );
+
   const [loading, setLoading] = useState(false);
   const [showSpecialties, setShowSpecialties] = useState(false);
 
@@ -78,12 +94,20 @@ export default function DoctorFormScreen() {
 
     setLoading(true);
     try {
+      const extra = {
+        visit_days: visitDays,
+        visit_period: visitPeriod,
+        cycle_target: Math.max(1, parseInt(cycleTarget) || 1),
+      };
       if (isEditing) {
-        // Passa o endereço original para evitar geocoding desnecessário
-        // quando o rep editar só nome ou horário sem mudar o endereço
-        await updateDoctor(editingDoctor.id, form, editingDoctor.address);
+        await updateDoctor(
+          editingDoctor.id,
+          form,
+          editingDoctor.address,
+          extra,
+        );
       } else {
-        await createDoctor(form);
+        await createDoctor(form, extra);
       }
       navigation.goBack();
     } catch (e: any) {
@@ -174,6 +198,36 @@ export default function DoctorFormScreen() {
           onChangeText={(v) => setField("hours", v)}
           autoCapitalize="none"
         />
+        <Text style={styles.label}>Dias de atendimento</Text>
+        <WeekDayPicker selected={visitDays} onChange={setVisitDays} />
+        <Text style={styles.label}>Periodo de visita</Text>
+        <PeriodPicker selected={visitPeriod} onChange={setVisitPeriod} />
+        <Text style={styles.label}>Visitas por Ciclo</Text>
+        <Text style={styles.hint}>
+          {" "}
+          Quantas vezes medico foi visitado no trimestre
+        </Text>
+        <View style={styles.cycleRow}>
+          {[1, 2, 3, 4, 6].map((n) => (
+            <TouchableOpacity
+              key={n}
+              style={[
+                styles.cycleBtn,
+                cycleTarget === String(n) && styles.cycleBtnActive,
+              ]}
+              onPress={() => setCycleTarget(String(n))}
+            >
+              <Text
+                style={[
+                  styles.cycleBtnText,
+                  cycleTarget === String(n) && styles.cycleBtnTextActive,
+                ]}
+              >
+                {n}x
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
         <TouchableOpacity
           style={styles.button}

@@ -26,6 +26,13 @@ import CheckInModal from "../components/CheckInModal";
 import { VisitLog } from "../types";
 import { getLogsByDate, upsertLog } from "../services/visitsLogs";
 
+// Import de Cycle, Week e Periodo
+import WeekDayPicker from "../components/WeekDayPicker";
+import PeriodPicker from "../components/PeriodPicker";
+import CycleDots from "../components/CycleDots";
+import { getCycleSummaries, getCycleLabel } from "../services/cycleLogs";
+import { WeekDay, VisitPeriod, CycleSummary } from "../types";
+
 type DistanceInfo = {
   nearest: Doctor;
   farthest: Doctor;
@@ -58,9 +65,30 @@ export default function RouteScreen() {
   const [todayLogs, setTodayLogs] = useState<VisitLog[]>([]);
   const [showFilters, setShowFilters] = useState(false);
 
+  // Import States Cycle, Week e Period
+  const [filterDay, setFilterDay] = useState<WeekDay[]>([]);
+  const [filterPeriod, setFilterPeriod] = useState<VisitPeriod>("both");
+  const [cycleSummaries, setCycleSummaries] = useState<
+    Record<string, CycleSummary>
+  >({});
+
   useEffect(() => {
     loadDoctors();
   }, []);
+
+  function getTodayWeekDay(): WeekDay {
+    const map: WeekDay[] = [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "monday",
+      "monday", // fallback sab/dom → seg
+    ];
+    const idx = new Date().getDay();
+    return map[idx === 0 ? 6 : idx - 1];
+  }
 
   async function loadDoctors() {
     try {
@@ -73,6 +101,13 @@ export default function RouteScreen() {
       setSpecialties(specs);
       const logs = await getLogsByDate(today);
       setTodayLogs(logs);
+      // Carrega ciclos
+      const summaries = await getCycleSummaries(doctors.map((d) => d.id));
+      // Injeta o cycle_target de cada médico
+      doctors.forEach((d) => {
+        if (summaries[d.id]) summaries[d.id].target = d.cycle_target ?? 1;
+      });
+      setCycleSummaries(summaries);
     } catch (e: any) {
       Alert.alert("Erro", e.message);
     }
@@ -82,6 +117,21 @@ export default function RouteScreen() {
     if (excludedIds.has(d.id)) return false;
     if (filterSpecialty !== "Todas" && d.specialty !== filterSpecialty)
       return false;
+
+    // Filtro por dia da semana
+    if (filterDay.length > 0) {
+      const docDays: WeekDay[] = (d.visit_days as WeekDay[]) ?? [];
+      if (docDays.length > 0 && !filterDay.some((fd) => docDays.includes(fd))) {
+        return false;
+      }
+    }
+
+    // Filtro por período
+    if (filterPeriod !== "both") {
+      const docPeriod = d.visit_period ?? "both";
+      if (docPeriod !== "both" && docPeriod !== filterPeriod) return false;
+    }
+
     return true;
   });
 
@@ -314,7 +364,38 @@ export default function RouteScreen() {
                   </TouchableOpacity>
                 ))}
               </ScrollView>
+              {/* Adicionando filtro de dia da semana */}
+              <Text style={styles.filterLabel}>Dia da semana</Text>
+              <View style={{ marginBottom: 10 }}>
+                <WeekDayPicker
+                  selected={filterDay}
+                  onChange={(days) => {
+                    setFilterDay(days);
+                    setResult(null);
+                  }}
+                />
+              </View>
 
+              <TouchableOpacity
+                style={styles.todayBtn}
+                onPress={() => {
+                  setFilterDay([getTodayWeekDay()]);
+                  setResult(null);
+                }}
+              >
+                <Text style={styles.todayBtnText}>Usar dia de hoje</Text>
+              </TouchableOpacity>
+
+              <Text style={styles.filterLabel}>Período</Text>
+              <View style={{ marginBottom: 4 }}>
+                <PeriodPicker
+                  selected={filterPeriod}
+                  onChange={(p) => {
+                    setFilterPeriod(p);
+                    setResult(null);
+                  }}
+                />
+              </View>
               <Text style={styles.filterLabel}>Excluir do roteiro</Text>
               {allDoctors.map((d) => {
                 const excluded = excludedIds.has(d.id);
@@ -484,6 +565,23 @@ export default function RouteScreen() {
                       </View>
                       <View style={styles.stopInfo}>
                         <Text style={styles.stopName}>{stop.doctor.name}</Text>
+                        <Text style={styles.stopSpecialty}>
+                          {stop.doctor.specialty}
+                        </Text>
+                        {cycleSummaries[stop.doctor.id] && (
+                          <CycleDots summary={cycleSummaries[stop.doctor.id]} />
+                        )}
+                        {stop.distance_from_prev_km !== undefined &&
+                          stop.distance_from_prev_km > 0 && (
+                            <Text style={styles.stopDist}>
+                              +{stop.distance_from_prev_km} km
+                            </Text>
+                          )}
+                        {log?.comment ? (
+                          <Text style={styles.stopComment}>
+                            "{log.comment}"
+                          </Text>
+                        ) : null}
                         <Text style={styles.stopSpecialty}>
                           {stop.doctor.specialty}
                         </Text>

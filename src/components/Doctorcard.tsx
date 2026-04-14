@@ -2,11 +2,14 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { Doctor } from "../types";
 import styles from "./Doctorcardstyle";
+import CycleDots from "./CycleDots";
+import { CycleSummary } from "../types";
 
 interface Props {
   doctor: Doctor;
   onEdit: (doctor: Doctor) => void;
   onDelete: (id: string) => void;
+  summary?: CycleSummary;
 }
 
 // Gera iniciais a partir das palavras do nome da especialidade
@@ -17,7 +20,12 @@ function getInitials(specialty: string): string {
   return (words[0][0] + words[1][0]).toUpperCase();
 }
 
-export default function DoctorCard({ doctor, onEdit, onDelete }: Props) {
+export default function DoctorCard({
+  doctor,
+  onEdit,
+  onDelete,
+  summary,
+}: Props) {
   function confirmDelete() {
     Alert.alert("Excluir médico", `Deseja excluir ${doctor.name}?`, [
       { text: "Cancelar", style: "cancel" },
@@ -44,6 +52,7 @@ export default function DoctorCard({ doctor, onEdit, onDelete }: Props) {
         {doctor.hours ? (
           <Text style={styles.hours}>Atend.: {doctor.hours}</Text>
         ) : null}
+        {summary && <CycleDots summary={summary} />}
       </View>
 
       <View style={styles.actions}>

@@ -90,6 +90,22 @@ export default function CheckInModal({
             <TouchableOpacity
               style={[
                 styles.statusBtn,
+                status === "absent" && styles.statusAbsent,
+              ]}
+              onPress={() => setStatus("absent")}
+            >
+              <Text
+                style={[
+                  styles.statusBtnText,
+                  status === "absent" && styles.statusAbsentText,
+                ]}
+              >
+                ◑ Ausente
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.statusBtn,
                 status === "not_visited" && styles.statusNotVisited,
               ]}
               onPress={() => setStatus("not_visited")}
@@ -100,7 +116,7 @@ export default function CheckInModal({
                   status === "not_visited" && styles.statusNotVisitedText,
                 ]}
               >
-                ✗ Não visitado
+                ✗ Insucesso
               </Text>
             </TouchableOpacity>
           </View>

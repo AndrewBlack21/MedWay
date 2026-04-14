@@ -267,6 +267,21 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#888",
   },
+  todayBtn: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: "#E1F5EE",
+    borderWidth: 1,
+    borderColor: "#1D9E75",
+    marginBottom: 10,
+  },
+  todayBtnText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#0F6E56",
+  },
 });
 
 export default styles;

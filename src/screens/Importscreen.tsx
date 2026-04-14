@@ -16,6 +16,8 @@ import { RootStackParamList } from "../types";
 import { parseSpreadsheet, ImportRow } from "../services/Importer";
 import { createDoctor } from "../services/doctors";
 
+import { rowToExtra } from "../services/Importer";
+
 type Nav = NativeStackNavigationProp<RootStackParamList, "Import">;
 type RowStatus = "pending" | "importing" | "done" | "error";
 
@@ -88,12 +90,15 @@ export default function ImportScreen() {
       );
 
       try {
-        await createDoctor({
-          name: item.row.name,
-          specialty: item.row.specialty,
-          address: item.row.address,
-          hours: item.row.hours,
-        });
+        await createDoctor(
+          {
+            name: item.row.name,
+            specialty: item.row.specialty,
+            address: item.row.address,
+            hours: item.row.hours,
+          },
+          rowToExtra(item.row),
+        );
         setRows((prev) =>
           prev.map((r, i) => (i === item.idx ? { ...r, status: "done" } : r)),
         );
@@ -150,7 +155,15 @@ export default function ImportScreen() {
             2. Use as colunas abaixo (cabeçalho na linha 1):
           </Text>
           <View style={styles.cols}>
-            {["Nome *", "Especialidade", "Endereço *", "Horário"].map((c) => (
+            {[
+              "Nome *",
+              "Especialidade",
+              "Endereço *",
+              "Horário",
+              "Dias",
+              "Periodo",
+              "Ciclo",
+            ].map((c) => (
               <View key={c} style={styles.colBadge}>
                 <Text style={styles.colBadgeText}>{c}</Text>
               </View>
@@ -161,7 +174,9 @@ export default function ImportScreen() {
             Salvar como → CSV)
           </Text>
           <Text style={styles.infoHint}>
-            * obrigatório · Separador vírgula ou ponto-e-vírgula
+            * Dias: Seg, Ter, Qua, Qui, Sex (separados por vírgula){"\n"}
+            Periodo: Manhã, Tarde ou Ambos{"\n"}
+            Ciclo: número de visitas no trimestre (ex: 2)
           </Text>
         </View>
 
@@ -233,6 +248,44 @@ export default function ImportScreen() {
                   <Text style={styles.rowAddress} numberOfLines={1}>
                     {r.row.address}
                   </Text>
+                  <View style={styles.rowExtras}>
+                    {r.row.visit_days.length > 0 && (
+                      <View style={styles.extraBadge}>
+                        <Text style={styles.extraBadgeText}>
+                          📅{" "}
+                          {r.row.visit_days
+                            .map(
+                              (d) =>
+                                ({
+                                  monday: "Seg",
+                                  tuesday: "Ter",
+                                  wednesday: "Qua",
+                                  thursday: "Qui",
+                                  friday: "Sex",
+                                })[d],
+                            )
+                            .join(", ")}
+                        </Text>
+                      </View>
+                    )}
+                    {r.row.visit_period !== "both" && (
+                      <View style={styles.extraBadge}>
+                        <Text style={styles.extraBadgeText}>
+                          {r.row.visit_period === "morning"
+                            ? "🌅 Manhã"
+                            : "🌇 Tarde"}
+                        </Text>
+                      </View>
+                    )}
+                    {r.row.cycle_target > 1 && (
+                      <View style={styles.extraBadge}>
+                        <Text style={styles.extraBadgeText}>
+                          🔄 {r.row.cycle_target}x/ciclo
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+
                   {r.status === "error" && r.error ? (
                     <Text style={styles.rowErrorMsg}>{r.error}</Text>
                   ) : null}
@@ -451,4 +504,21 @@ const styles = StyleSheet.create({
     borderColor: "#E24B4A",
   },
   retryBtnText: { color: "#E24B4A", fontWeight: "600", fontSize: 13 },
+  rowExtras: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 4,
+    marginTop: 4,
+  },
+  extraBadge: {
+    backgroundColor: "#E1F5EE",
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  extraBadgeText: {
+    fontSize: 11,
+    color: "#0F6E56",
+    fontWeight: "600",
+  },
 });

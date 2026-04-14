@@ -14,11 +14,12 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 
-import { Doctor, RootStackParamList } from "../types";
+import { Doctor, RootStackParamList, CycleSummary } from "../types";
 import { getDoctors, deleteDoctor } from "../services/doctors";
 import { supabase } from "../lib/supabase";
 import DoctorCard from "../components/Doctorcard";
 import styles from "./Doctorslistcreenstyle";
+import { getCycleSummaries } from "../services/cycleLogs";
 
 type Nav = NativeStackNavigationProp<RootStackParamList, "DoctorsList">;
 
@@ -48,11 +49,19 @@ export default function DoctorsListScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [cycleSummaries, setCycleSummaries] = useState<
+    Record<string, CycleSummary>
+  >({});
 
   async function loadDoctors() {
     try {
       const data = await getDoctors();
       setDoctors(data);
+      const summaries = await getCycleSummaries(data.map((d) => d.id));
+      data.forEach((d) => {
+        if (summaries[d.id]) summaries[d.id].target = d.cycle_target ?? 1;
+      });
+      setCycleSummaries(summaries);
     } catch (e: any) {
       Alert.alert("Erro", e.message);
     } finally {
@@ -202,6 +211,7 @@ export default function DoctorsListScreen() {
             doctor={item}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            summary={cycleSummaries[item.id]}
           />
         )}
         contentContainerStyle={styles.list}

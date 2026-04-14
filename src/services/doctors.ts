@@ -2,6 +2,11 @@ import { supabase } from "../lib/supabase";
 import { Doctor, DoctorFormData } from "../types";
 import { geocodeAddress } from "./geocoding";
 
+interface DoctorExtra {
+  visit_days?: string[];
+  visit_period?: string;
+  cycle_target?: number;
+}
 export async function getDoctors(): Promise<Doctor[]> {
   const { data, error } = await supabase
     .from("doctors")
@@ -23,7 +28,10 @@ export async function getDoctorById(id: string): Promise<Doctor> {
   return data;
 }
 
-export async function createDoctor(form: DoctorFormData): Promise<Doctor> {
+export async function createDoctor(
+  form: DoctorFormData,
+  extra?: DoctorExtra,
+): Promise<Doctor> {
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) throw new Error("Usuario não autenticado.");
 
@@ -39,6 +47,9 @@ export async function createDoctor(form: DoctorFormData): Promise<Doctor> {
       lat: coords.lat,
       lng: coords.lng,
       hours: form.hours.trim() || null,
+      visit_days: extra?.visit_days ?? [],
+      visit_period: extra?.visit_period ?? "both",
+      cycle_target: extra?.cycle_target ?? 1,
     })
     .select()
     .single();
@@ -54,6 +65,7 @@ export async function updateDoctor(
   id: string,
   form: DoctorFormData,
   previousAddress?: string,
+  extra?: DoctorExtra,
 ): Promise<Doctor> {
   const addressChanged = form.address.trim() !== previousAddress?.trim();
   const coords = addressChanged ? await geocodeAddress(form.address) : null;
@@ -63,6 +75,13 @@ export async function updateDoctor(
     specialty: form.specialty.trim(),
     address: form.address.trim(),
     hours: form.hours.trim() || null,
+    ...(extra?.visit_days !== undefined && { visit_days: extra.visit_days }),
+    ...(extra?.visit_period !== undefined && {
+      visit_period: extra.visit_period,
+    }),
+    ...(extra?.cycle_target !== undefined && {
+      cycle_target: extra.cycle_target,
+    }),
   };
 
   if (coords) {

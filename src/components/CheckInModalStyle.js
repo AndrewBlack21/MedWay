@@ -104,6 +104,13 @@ const styles = StyleSheet.create({
     color: "#aaa",
     fontSize: 14,
   },
+  statusAbsent: {
+    borderColor: "#EF9F27",
+    backgroundColor: "#FAEEDA",
+  },
+  statusAbsentText: {
+    color: "#854F0B",
+  },
 });
 
 export default styles;

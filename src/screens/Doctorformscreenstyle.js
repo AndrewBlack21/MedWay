@@ -71,6 +71,31 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   cancelText: { color: "#fff", fontSize: 14, fontWeight: "700" },
+  cycleRow: {
+    flexDirection: "row",
+    gap: 8,
+    flexWrap: "wrap",
+  },
+  cycleBtn: {
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: "#ddd",
+    backgroundColor: "#fff",
+  },
+  cycleBtnActive: {
+    borderColor: "#1D9E75",
+    backgroundColor: "#E1F5EE",
+  },
+  cycleBtnText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#888",
+  },
+  cycleBtnTextActive: {
+    color: "#0F6E56",
+  },
 });
 
 export default styles;

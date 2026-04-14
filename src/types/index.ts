@@ -9,6 +9,9 @@ export interface Doctor {
   lat: number;
   lng: number;
   hours: string | null;
+  visit_days: WeekDay[];
+  visit_period: VisitPeriod;
+  cycle_target: number;
   created_at: string;
 }
 
@@ -19,7 +22,24 @@ export interface DoctorFormData {
   hours: string;
 }
 
-export type VisitStatus = "visited" | "not_visited" | "pending";
+export type WeekDay =
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday";
+
+export type VisitPeriod = "morning" | "afternoon" | "both";
+
+export type VisitStatus = "visited" | "not_visited" | "absent" | "pending";
+
+export interface CycleSummary {
+  doctorId: string;
+  target: number;
+  visited: number;
+  absent: number;
+  failed: number;
+}
 
 export interface VisitLog {
   id: string;
