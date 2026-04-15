@@ -647,6 +647,7 @@ export default function RouteScreen() {
         doctor={selectedDoctor}
         onClose={() => setSelectedDoctor(null)}
       />
+      {/*   Fim do View Principal */}
     </View>
   );
 }
