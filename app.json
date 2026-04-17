@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "PharmaRoute",
-    "slug": "pharma-route",
+    "name": "MedWay",
+    "slug": "MedWay",
     "platforms": ["ios", "android"],
     "version": "1.0.0",
     "orientation": "portrait",
@@ -14,14 +14,14 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.pharmaroute.app",
+      "bundleIdentifier": "com.medway.app",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Usamos sua localização para exibir sua posição no mapa e calcular rotas.",
         "NSLocationAlwaysUsageDescription": "Usamos sua localização para rastreamento de visitas em campo."
       }
     },
     "android": {
-      "package": "com.pharmaroute.app",
+      "package": "com.medway.app",
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
