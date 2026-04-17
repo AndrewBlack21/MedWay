@@ -14,11 +14,12 @@ import MapScreen from "../screens/MapScreen";
 import RouteScreen from "../screens/Routescreen";
 import ImportScreen from "../screens/Importscreen";
 import CalendarScreen from "../screens/CalendarScreen";
+import HomeScreen from "../screens/HomeScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const headerOptions = {
-  headerStyle: { backgroundColor: "#1D9E75" },
+  headerStyle: { backgroundColor: "#FF4B8B" },
   headerTintColor: "#fff",
   headerTitleStyle: { fontWeight: "600" as const },
   headerBackTitle: "Voltar",
@@ -60,6 +61,11 @@ export default function AppNavigator() {
           </Stack.Group>
         ) : (
           <Stack.Group>
+            <Stack.Screen
+              name="Home"
+              component={HomeScreen}
+              options={{ headerShown: false }}
+            />
             <Stack.Screen
               name="DoctorsList"
               component={DoctorsListScreen}

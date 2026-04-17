@@ -76,6 +76,7 @@ export interface Coordinates {
 
 export type RootStackParamList = {
   Login: undefined;
+  Home: undefined;
   DoctorsList: undefined;
   DoctorForm: { doctor?: Doctor };
   Map: undefined;

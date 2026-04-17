@@ -2,13 +2,16 @@ import { StyleSheet } from "react-native";
 import { colors } from "../theme/color";
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f7f9f8" },
+  container: { flex: 1, backgroundColor: "#f7f9f8", backgroundColor: "" },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   actions: {
     flexDirection: "row",
     gap: 8,
     padding: 14,
     paddingBottom: 6,
+  },
+  header: {
+    backgroundColor: "#FF4B8B",
   },
   actionBtn: {
     flex: 1,
@@ -29,7 +32,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#EEEDFE",
     borderColor: "#AFA9EC",
   },
-  actionBtnExportText: { color: "#3C3489", fontWeight: "600", fontSize: 12 },
+  actionBtnExportText: { color: "#FF4B8B", fontWeight: "600", fontSize: 12 },
   list: { padding: 14, paddingBottom: 90 },
   empty: { alignItems: "center", marginTop: 60 },
   emptyText: { fontSize: 16, color: "#555", fontWeight: "500" },

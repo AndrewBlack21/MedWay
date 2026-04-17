@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: "#1D9E75",
+    backgroundColor: "#FF4B8B",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#0F6E56",
+    backgroundColor: "#FF4B8B",
   },
   pinText: {
     color: "#fff",

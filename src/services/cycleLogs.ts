@@ -1,7 +1,7 @@
 import { supabase } from "../lib/supabase";
 import { CycleSummary } from "../types";
 
-function getCycleRange(): { from: string; to: string } {
+export function getCycleRange(): { from: string; to: string } {
   const now = new Date();
   const month = now.getMonth();
   const year = now.getFullYear();

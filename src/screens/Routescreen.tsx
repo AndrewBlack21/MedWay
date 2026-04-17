@@ -10,6 +10,8 @@ import {
   Linking,
   Platform,
   TextInput,
+  Pressable,
+  Keyboard,
 } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
 import * as Location from "expo-location";
@@ -275,6 +277,8 @@ export default function RouteScreen() {
         style={styles.map}
         showsUserLocation={!usingGPS}
         key={result ? "with-route" : "no-route"}
+        onPress={() => Keyboard.dismiss()}
+        onPanDrag={() => Keyboard.dismiss()}
       >
         {/* Pin do ponto de partida */}
         {startCoords && (
@@ -450,7 +454,8 @@ export default function RouteScreen() {
           {/* Ponto de partida */}
           <View style={styles.startSection}>
             <Text style={styles.sectionLabel}>Ponto de partida</Text>
-            <View style={styles.startRow}>
+
+            <Pressable onPress={Keyboard.dismiss} style={styles.startRow}>
               <TextInput
                 style={styles.startInput}
                 placeholder="Endereço ou use o GPS"
@@ -464,6 +469,7 @@ export default function RouteScreen() {
                 onSubmitEditing={geocodeStart}
                 returnKeyType="search"
               />
+
               <TouchableOpacity
                 style={styles.gpsBtn}
                 onPress={useCurrentLocation}
@@ -488,7 +494,7 @@ export default function RouteScreen() {
                   )}
                 </TouchableOpacity>
               )}
-            </View>
+            </Pressable>
 
             {distanceInfo && startCoords && (
               <View style={styles.distanceCards}>

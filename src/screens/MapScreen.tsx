@@ -86,7 +86,7 @@ export default function MapScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#1D9E75" />
+        <ActivityIndicator size="large" color="#FF4B8B" />
       </View>
     );
   }

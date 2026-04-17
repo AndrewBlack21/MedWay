@@ -89,9 +89,9 @@ export default function DoctorsListScreen() {
     navigation.navigate("DoctorForm", { doctor });
   }
 
-  async function handleLogout() {
-    await supabase.auth.signOut();
-  }
+  // async function handleLogout() {
+  //   await supabase.auth.signOut();
+  // }
 
   async function handleExportExcel() {
     if (doctors.length === 0) {
@@ -134,16 +134,6 @@ export default function DoctorsListScreen() {
     }
   }
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity onPress={handleLogout} style={{ marginRight: 4 }}>
-          <Text style={{ color: "#fff", fontSize: 14 }}>Sair</Text>
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation]);
-
   if (loading) {
     return (
       <View style={styles.center}>
@@ -155,15 +145,17 @@ export default function DoctorsListScreen() {
   return (
     <View style={styles.container}>
       {/* Barra de ações rápidas — linha 1 */}
-      <View style={styles.actions}>
-        <TouchableOpacity
+      {/* <View style={styles.actions}> */}
+      {/* Botao para ver o mapa na lista de medico */}
+      {/* <TouchableOpacity
           style={styles.actionBtn}
           onPress={() => navigation.navigate("Map")}
         >
           <Text style={styles.actionBtnText}>Ver Mapa</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
-        <TouchableOpacity
+      {/* Botao para ver o historico de visita */}
+      {/* <TouchableOpacity
           style={[
             styles.actionBtn,
             { backgroundColor: "#EEF0FE", borderColor: "#AFA9EC" },
@@ -173,30 +165,34 @@ export default function DoctorsListScreen() {
           <Text style={{ color: "#3C3489", fontWeight: "600", fontSize: 12 }}>
             📅 Histórico
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
-        <TouchableOpacity
+      {/* Botao para gerar o roteiro */}
+      {/* <TouchableOpacity
           style={styles.actionBtn}
           onPress={() => navigation.navigate("Route")}
         >
           <Text style={styles.actionBtnText}>Gerar Roteiro</Text>
-        </TouchableOpacity>
-      </View>
+        </TouchableOpacity> */}
+      {/* </View> */}
       {/* Barra de ações rápidas — linha 2 */}
+
+      {/* Botao para importa os arquivos */}
       <View style={styles.actions}>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={[styles.actionBtn, styles.actionBtnImport]}
           onPress={() => navigation.navigate("Import")}
         >
           <Text style={styles.actionBtnImportText}>Importar Planilha</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
+
         <TouchableOpacity
           style={[styles.actionBtn, styles.actionBtnExport]}
           onPress={handleExportExcel}
           disabled={exporting}
         >
           {exporting ? (
-            <ActivityIndicator size="small" color="#533AB7" />
+            <ActivityIndicator size="small" color="#FF4B8B" />
           ) : (
             <Text style={styles.actionBtnExportText}>Exportar XLS</Text>
           )}
@@ -222,7 +218,7 @@ export default function DoctorsListScreen() {
               setRefreshing(true);
               loadDoctors();
             }}
-            tintColor="#1D9E75"
+            tintColor="#FF4B8B"
           />
         }
         ListEmptyComponent={
@@ -237,12 +233,13 @@ export default function DoctorsListScreen() {
         }
       />
 
-      <TouchableOpacity
+      {/* Botao para adicionar mais medico  */}
+      {/* <TouchableOpacity
         style={styles.fab}
         onPress={() => navigation.navigate("DoctorForm", {})}
       >
         <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 }

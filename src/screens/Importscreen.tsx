@@ -292,7 +292,7 @@ export default function ImportScreen() {
                 </View>
                 <View style={styles.rowStatus}>
                   {r.status === "importing" && (
-                    <ActivityIndicator size="small" color="#1D9E75" />
+                    <ActivityIndicator size="small" color="#FF4B8B" />
                   )}
                   {r.status === "done" && (
                     <Text style={styles.statusDone}>✓</Text>
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f7f9f8" },
   content: { padding: 16 },
   infoBox: {
-    backgroundColor: "#E1F5EE",
+    backgroundColor: "#F7B0F6",
     borderRadius: 12,
     padding: 14,
     marginBottom: 16,
@@ -387,10 +387,10 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#0F6E56",
+    color: "#fff",
     marginBottom: 2,
   },
-  infoStep: { fontSize: 12, color: "#085041", lineHeight: 18 },
+  infoStep: { fontSize: 12, color: "#fff", lineHeight: 18 },
   infoBold: { fontWeight: "700" },
   cols: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginVertical: 4 },
   colBadge: {
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
     borderColor: "#5DCAA5",
   },
   colBadgeText: { fontSize: 12, color: "#0F6E56", fontWeight: "600" },
-  infoHint: { fontSize: 11, color: "#1D9E75", marginTop: 2 },
+  infoHint: { fontSize: 11, color: "#fff", marginTop: 2 },
   pickBtn: {
     backgroundColor: "#fff",
     borderRadius: 12,
