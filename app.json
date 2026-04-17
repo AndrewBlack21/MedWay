@@ -1,8 +1,11 @@
 {
   "expo": {
     "name": "MedWay",
-    "slug": "MedWay",
-    "platforms": ["ios", "android"],
+    "slug": "pharma-route",
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/medway.png",
@@ -23,10 +26,6 @@
     "android": {
       "package": "com.medway.app",
       "permissions": [
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION",
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_COARSE_LOCATION",
