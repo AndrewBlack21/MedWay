@@ -6,7 +6,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
     justifyContent: "center",
-    paddingHorizontal: 28,
+    paddingHorizontal: 25,
   },
   header: {
     alignItems: "center",
@@ -20,6 +20,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 12,
+    marginTop: "50%",
   },
   logoImage: {
     width: 300,
