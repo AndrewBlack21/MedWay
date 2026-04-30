@@ -35,15 +35,6 @@ type Nav = NativeStackNavigationProp<RootStackParamList, "Home">;
 
 const QUICK_ACCESS = [
   {
-    id: "history",
-    title: "Histórico de Visitas",
-    subtitle: "Ver todos os registros",
-    color: "#FF4B8B",
-    source: anim.history,
-    route: "Calendar",
-    delay: 100,
-  },
-  {
     id: "cycle",
     title: "Ciclo de Visitas",
     subtitle: "Acompanhar progresso trimestral",
@@ -91,6 +82,16 @@ const FAB_ACTIONS = [
     icon: "👨‍⚕️",
     color: "#1D9E75",
     route: "DoctorForm",
+  },
+  {
+    id: "privacy",
+    label: "Privacidade e LGPD",
+    icon: "🔒",
+    // subtitle: "Gerencie seus dados e consentimento",
+    color: "#9B6FE8",
+    source: anim.cycle,
+    route: "Privacy",
+    delay: 400,
   },
 ];
 
@@ -149,7 +150,7 @@ export default function HomeScreen() {
           <Text style={styles.headerSub}>Seu assistente de visitas</Text>
         </View>
         <TouchableOpacity onPress={handleLogout} style={styles.settingsBtn}>
-          <Text style={styles.settingsIcon}> </Text>
+          <Text style={styles.settingsIcon}>📤</Text>
         </TouchableOpacity>
       </View>
 

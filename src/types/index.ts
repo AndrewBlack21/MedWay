@@ -83,4 +83,5 @@ export type RootStackParamList = {
   Route: undefined;
   Import: undefined; // nova rota de importação
   Calendar: undefined;
+  Privacy: undefined;
 };

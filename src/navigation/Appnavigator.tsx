@@ -16,6 +16,8 @@ import ImportScreen from "../screens/Importscreen";
 import CalendarScreen from "../screens/CalendarScreen";
 import HomeScreen from "../screens/HomeScreen";
 
+import PrivacyScreen from "../screens/PrivacyScreen";
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const headerOptions = {
@@ -95,6 +97,11 @@ export default function AppNavigator() {
               name="Import"
               component={ImportScreen}
               options={{ title: "Importar Planilha" }}
+            />
+            <Stack.Screen
+              name="Privacy"
+              component={PrivacyScreen}
+              options={{ title: "Privacidade e LGPD" }}
             />
           </Stack.Group>
         )}
